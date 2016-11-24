@@ -1,0 +1,293 @@
+import javax.swing.*;
+
+import java.awt.*;
+import java.awt.event.*;
+
+
+
+public class HmFrame extends JFrame {
+
+	JMenuBar menubar;
+	JMenu game, options;
+	JMenuItem start, quit;
+	JRadioButton easy, medium, hard;
+	ButtonGroup group;
+	JPanel panel1, panel2, panel3, panel4;
+	JTextField statusfield, missfield;
+	LimitedJTextField guessfield;		//it allows one character input shows in upper case
+	JLabel gllabel, statuslabel, guesslabel, misslabel;
+			
+	int countryIndex, nameSize, inputLength, miss, guessLeft, counter1, counter2;
+	
+	char inputChar;
+	
+	String inputText, initialStatus, currentStatus, countryName;
+	
+	char [] status, inputList, misses;
+	
+
+	public HmFrame() {
+		super();
+		
+		start = new JMenuItem("Start");
+		start.addActionListener(new ToStart());
+		quit = new JMenuItem("Quit");
+		quit.addActionListener(new ToQuit());
+		
+		game = new JMenu("Game");
+		game.add(start);
+		game.add(quit);
+		
+		easy = new JRadioButton("Easy");
+		easy.addActionListener(new ActiveRadioButton());
+		medium = new JRadioButton("Medium");
+		medium.setSelected(true);
+		medium.addActionListener(new ActiveRadioButton());
+		hard = new JRadioButton("Hard");
+		hard.addActionListener(new ActiveRadioButton());
+		
+		group = new ButtonGroup();
+		group.add(easy);
+		group.add(medium);
+		group.add(hard);
+		
+		options = new JMenu("Options");
+		options.add(easy);
+		options.add(medium);
+		options.add(hard);
+		
+		menubar = new JMenuBar();
+		menubar.add(game);
+		menubar.add(options);
+		this.setJMenuBar(menubar);
+		
+		setLayout(new GridLayout(4, 1, 0, 0));
+		
+		panel1 = new JPanel();
+		gllabel = new JLabel("Guesses left: " );
+		panel1.add(gllabel);
+		this.add(panel1);
+
+		panel2 = new JPanel();
+		statuslabel = new JLabel("Current status: ");
+		panel2.add(statuslabel);
+		statusfield = new JTextField(20);
+		statusfield.setEnabled(false);
+		statusfield.setDisabledTextColor(Color.BLACK);
+		Font font =new Font( initialStatus, Font.BOLD, 15 );
+		statusfield.setFont(font);
+		panel2.add(statusfield);
+		this.add(panel2);
+
+		panel3 = new JPanel();
+		guesslabel = new JLabel("Guess: ");
+		panel3.add(guesslabel);
+		guessfield = new LimitedJTextField(1);
+		guessfield.addActionListener(new ActiveGuessField());
+		
+		guessfield.setEnabled(false);
+		panel3.add(guessfield);		
+		this.add(panel3);
+
+		panel4 = new JPanel();
+		misslabel = new JLabel("Misses: ");
+		panel4.add(misslabel);
+		missfield = new JTextField(10);
+		missfield.setEnabled(false);
+		panel4.add(missfield);
+		this.add(panel4);
+		
+	}
+	
+	
+	private class ActiveRadioButton implements ActionListener{
+		public void actionPerformed(ActionEvent ae){
+			try{
+				if(easy.isSelected()){
+					guessLeft = 10;
+				}else {
+					if(medium.isSelected()){
+						guessLeft = 7;
+					}else {
+						if(hard.isSelected()){
+							guessLeft = 5;
+						}
+					}
+				}
+				
+				gllabel.setText("Guesses left:  " +guessLeft);
+				setInitialCondition();
+			}
+			catch (Exception e){
+				System.out.println(e);
+			}
+		}
+	}
+		
+	private class ActiveGuessField implements ActionListener {
+		public void actionPerformed(ActionEvent ae) {		 
+			try{
+				inputText = guessfield.getText();
+				guessfield.setText("");
+				inputChar = inputText.charAt(0);
+				inputLength= inputText.length();
+			}catch (Exception e) {
+				System.out.println(e);
+			}		
+		}	
+	}
+	
+	private class ToQuit implements ActionListener{
+		public void actionPerformed(ActionEvent ae){
+			try{
+				System.exit(0);
+			}
+			catch (Exception e){
+				System.out.println(e);
+			}
+		}
+	}
+	
+	private class ToStart implements ActionListener{
+		public void actionPerformed(ActionEvent ae){
+			try{
+				setInitialCondition();
+				//randomly select a word from the word list.
+				FileReader reader = new FileReader();
+				countryName= reader.findWord();
+				nameSize = countryName.length();
+				status = new char[((nameSize * 3))];
+				//we create _ _ _ for current status. one '_' followed by two 'space'
+				for (int i = 0; i < (nameSize * 3); i++) {
+					status[i] = '_';
+					status[i+1] = ' ';
+					status[i+2] = ' ';
+					i=i+2;	
+				}
+				initialStatus = new String(status);
+				statusfield.setText(initialStatus);
+				
+				guessfield.setEnabled(true);
+				
+				if(easy.isSelected()){
+					guessLeft = 10;
+				} else{
+					if(medium.isSelected()){
+						guessLeft = 7;
+					} else{
+						if(hard.isSelected()){
+							guessLeft = 5;
+						}
+					}
+				}
+				gllabel.setText("Guesses left:  " +guessLeft);
+			}
+			catch (Exception e){
+				System.out.println(e);
+			}
+		}
+	}
+
+	
+	public void setInitialCondition(){
+		
+		//setting initial condition 
+		statusfield.setBackground(Color.WHITE);
+		statusfield.setText(null);
+		guessfield.setEnabled(false);
+		missfield.setText(null);
+		inputList = new char[26];
+		misses = new char[10];
+		miss = 0;
+		counter1 = 0;
+		counter2 = 0;
+	}
+	
+	public void getNextInput() {
+		
+		//here we wait for a input, check if it is a letter and check if it was used before
+		inputLength = 0;
+		boolean done=false;
+        while (!done){
+        
+        	if (inputLength > 0) {				//as soon as we get a input inputLength is > 0.
+        		if(Character.isLetter(inputChar)){	//we check the input if it is a letter.
+        		
+        			if(counter1 != 0){			//for the very first we don't check whether it was used before.
+        				boolean match =false;	//from the 2nd entry we check for the dupplicacy of input.
+        				for(int i = 0; i < inputList.length; i++){
+        					if (inputChar == inputList[i]){
+        						match = true;
+        					}
+        				}
+        				if(match == false){
+        					 inputLength = 0;
+        					 done=true;
+        				}else{
+        					JOptionPane.showMessageDialog(null, "The letter " + " " +inputChar + " " + "is already used!", "Error", JOptionPane.ERROR_MESSAGE);
+        					inputLength = 0;
+        				}
+        			}
+        			else{
+        				 inputLength = 0;
+        				 done=true;
+        			}	      
+        		}	
+        		else{
+        			JOptionPane.showMessageDialog(null, "You  must enter a letter", "Error", JOptionPane.ERROR_MESSAGE);
+        			inputLength = 0;
+        		}
+        	}else{
+				JFrame HmFrame = new JFrame();
+        		
+        	}
+        }
+	}
+	
+	public void doCalculation(){
+		
+		inputList[counter1]= inputChar; 		// each input is stored in an array
+		
+		boolean match = false;		
+		for(int i = 0; i <nameSize; i++){		// checking the input if match with any letter in the selected word
+			if(countryName.charAt(i) == inputChar){
+				status[i*3] = inputChar;
+				currentStatus = new String(status);
+				statusfield.setText(currentStatus);
+				match = true;
+				counter2++;
+			}
+		}
+		
+		if(counter2 == countryName.length()){
+			statusfield.setBackground(Color.GREEN);
+			guessfield.setEnabled(false);
+			JOptionPane.showMessageDialog(null, "Perfect guesses!! Congratulation!!", "Hang Man", JOptionPane.PLAIN_MESSAGE);
+		}
+		
+		if(match == false){						//if input don't match with any letter of the word, we put it in missfield.
+			misses[miss]= inputChar;
+			miss++;	
+			String MISSES = new String(misses);
+			missfield.setText(MISSES);
+			missfield.setDisabledTextColor(Color.RED);
+			guessLeft--;
+			gllabel.setText("Guesses left: " +guessLeft);
+			
+			if (guessLeft == 0){
+				statusfield.setBackground(Color.RED);
+				guessfield.setEnabled(false);
+				JOptionPane.showMessageDialog(null, "You lost!!  Correct answer was:  " +countryName, "Hang Man", JOptionPane.PLAIN_MESSAGE);
+			}
+		}
+		counter1++;
+	}
+	
+	public void playGame(){
+		
+		while(true){
+			getNextInput();
+			doCalculation();
+		}
+	}
+}

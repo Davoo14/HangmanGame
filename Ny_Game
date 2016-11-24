@@ -1,0 +1,293 @@
+
+
+
+
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Scanner;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
+
+
+public class Hangman3 {
+	
+	 
+	private static int gameMode = 0;
+	 int numberOfGuesses;
+	 private static JLabel guessesLeft;
+	 private static String[] getGuess = new String[1];
+	 private static JTextField  guessField;
+	 private static JTextField inputGuess;
+	 private static JTextField missesGuess;
+	 JButton guessButton;
+	 private static JMenuItem item1, item2,item3, item4, item5;
+	 private static String guessValue, misses="", mode="", outt;
+	 private static char[] status;
+	private static String guess; 
+	private static char guessChar;
+	
+	
+	public static void main(String[] args){
+		
+		
+		Hangman3 myHangMan = new Hangman3();
+		myHangMan.drawGUI();
+		
+		 // copy text from text file.
+		URL url = Hangman3.class.getResource("countries.txt");
+		File newFile = new File(url.getPath());
+		Scanner input = null;
+		try {
+			input = new Scanner(newFile);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		ArrayList<String> myCountries = new ArrayList<String>();
+
+		while (input.hasNext()) {
+			String temp = input.nextLine();
+			myCountries.add(temp);
+		}
+
+		Random random = new Random();
+
+		int r = random.nextInt(10); // get random between 0 & 9
+		guessValue = myCountries.get(r);
+		status = new char[guessValue.length()*2];
+		//String outPut = "";
+		 outt = "";
+		for (int i=0; i< guessValue.length()*2; i++){
+			status[i]='_';
+			status[i+1]=' ';
+			i++;
+		}
+		
+		///////////////////////////////////////////////
+	
+    	inputGuess.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+//System.out.println(inputGuess.getColumns() + " ");
+			    	
+		    	
+		     String validInputs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		     
+			    	
+    				if(gameMode>=0){
+			    	 
+    			    	guess = inputGuess.getText();
+
+    					
+			    	if(guess.length() == 0){
+			    		
+			    		//JOptionPane.showMessageDialog(null,"No Letter Entered");
+			    	}
+			    	
+			    	try{
+			    	guessChar = guess.charAt(0);
+			    	} catch (Exception g) {
+			    		
+			    		} 
+			    	getGuess[0] = inputGuess.getText();
+			    		
+			    	if(validInputs.contains(getGuess[0]) && Character.isLetter(guessChar)){
+			    		
+			
+
+			    		
+			    	if(misses.contains(getGuess[0]) || outt.contains(getGuess[0])){
+			    		
+			    		JOptionPane.showMessageDialog(null,"Error, Duplicate Letter or No Letter Entered");
+			    	}
+			    			    	
+			    	else if(guessValue.contains(getGuess[0])){
+			    		for(int i = 0; i < guessValue.length(); i++){
+			    			if(guessValue.charAt(i) == getGuess[0].charAt(0)){
+			    				
+			    				if(i>0){
+			    				status[(i*2)]=getGuess[0].charAt(0);
+			    				}
+			    				else{
+			    					status[i] = getGuess[0].charAt(0);
+			    				}
+			    			}
+			    			else
+			    				continue;
+			    			
+			    		}
+			    		//System.out.println("Found!");
+			    		outt = String.valueOf(status);
+			    		guessField.setText(outt);
+			    		
+			    	}
+			    	
+			    	else{
+			    		gameMode--;
+			    		//System.out.println("Not Found!");
+			    		misses+=getGuess[0];
+
+			    	  }
+			    	}
+			    	else{
+			    		JOptionPane.showMessageDialog(null,"ERROR, INVALID INPUT! !\n * Only upper case letter accepted\n * No letter duplication allowed\n * No symbols allowed \n * No blanks allowed");
+			    	}
+			   
+			    	missesGuess.setText(misses);
+			    	
+			    	mode = Integer.toString(gameMode);
+			    	guessesLeft.setText(mode);
+			    	
+		             }
+			    	
+			    	if(gameMode==0 && outt.contains("_")){
+			    		JOptionPane.showMessageDialog(null,"You Lost! \n Restart the game program to clear all fields and play again.");
+			    		item1.setEnabled(false);
+			    		item3.setEnabled(false);
+			            item4.setEnabled(false);
+			            item5.setEnabled(false);
+			    	}
+			    	else if(gameMode>=0 && !outt.contains("_")){
+			    		JOptionPane.showMessageDialog(null,"You Won! \n Restart the game program to clear all fields and play again.");
+			    	}
+			    	
+			    	}
+			    
+			});
+		
+		
+		item1.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+            System.out.println("Welcome to the Hang Man Game!\nChoose Difficulty mode in options\nEasy\nMedium\nHard");	
+            item3.setEnabled(true);
+            item4.setEnabled(true);
+            item5.setEnabled(true);
+
+        	outt = String.valueOf(status);
+    		guessField.setText(outt);
+
+		    }
+		});
+		
+		item2.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+            System.out.println("The End");		    }
+		});
+
+		item3.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+            gameMode = 10;
+            //System.out.println("Easy: " + gameMode);	
+            guessesLeft.setText(Integer.toString(gameMode));
+
+            }
+		});
+
+		item4.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        gameMode = 7;
+	            //System.out.println("Medium: " + gameMode);
+	            guessesLeft.setText(Integer.toString(gameMode));
+
+		    	}
+		});
+
+		item5.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        gameMode = 5;
+	            //System.out.println("Hard: " + gameMode);
+	            guessesLeft.setText(Integer.toString(gameMode));
+
+	            }
+		});
+	}
+	
+	// Frame Design and Input:
+	public void drawGUI(){
+		
+		JFrame myframe;
+		guessesLeft = new JLabel();
+	    guessField = new JTextField(10);
+		inputGuess = new JTextField(1);
+		missesGuess = new JTextField(10);
+		
+			
+			myframe = new JFrame("Hangman");			
+			guessesLeft.setText(" ");
+			myframe.setLayout(new FlowLayout(FlowLayout.CENTER, 100, 30));
+			myframe.add(new JLabel("Guesses Left:"));
+			myframe.add(guessesLeft);
+			
+			
+			myframe.add(new JLabel("Current Status"));
+			myframe.add(guessField);
+			guessField.setEditable(false);
+			
+			myframe.add(new JLabel("Guess"));
+			myframe.add(inputGuess);
+		
+			
+			myframe.add(new JLabel("Player Misses"));
+			myframe.add(missesGuess);
+	
+			
+			
+			// Set game menu bar.
+			JMenu firstMenu = new JMenu("GAME");
+			JMenu secondMenu = new JMenu("OPTIONS");
+
+			 item1 = new JMenuItem("Start");
+			firstMenu.add(item1);
+
+			 item2 = new JMenuItem("Quit");
+			firstMenu.add(item2);
+			item2.addActionListener(new ActionListener() {
+			    public void actionPerformed(ActionEvent e) {
+	            System.exit(0);		    }
+			});
+			
+			 item3 = new JMenuItem("Easy");
+			secondMenu.add(item3);
+			item3.setEnabled(false);
+			
+			 item4 = new JMenuItem("Medium");
+			secondMenu.add(item4);
+			item4.setEnabled(false);
+			
+			 item5 = new JMenuItem("Hard");
+			secondMenu.add(item5);
+			item5.setEnabled(false);
+			
+			JMenuBar menubar = new JMenuBar();
+			menubar.add(firstMenu);
+			menubar.add(secondMenu);
+			
+			
+			//Set Frame specification
+			myframe.setJMenuBar(menubar);
+			JOptionPane.showMessageDialog(null,"Select GAME and Start then OPTIONS and Easy/Medium/Hard to play the game.");
+			
+			myframe.setSize(420, 300);
+			myframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			myframe.setLocationRelativeTo(null);
+			myframe.setVisible(true);
+
+	}
+}
+
+

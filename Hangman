@@ -1,0 +1,19 @@
+import javax.swing.*;
+
+
+public class Hangman {
+	
+	public static void main(String[]args){
+		
+		HmFrame frame = new HmFrame();
+		frame.setTitle("HangMan");
+		frame.setSize(400, 300);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+		
+		frame.playGame();
+			 
+	}
+
+}
